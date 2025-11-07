@@ -66,7 +66,7 @@ def criar_secao_lancamento_notas(frame, alunos):
             return
 
         media = round((4 * np1 + 4 * np2 + 2 * pim) / 10, 2)
-        situacao = "Aprovado" if media >= 7 else "Exame" if media >= 4 else "Reprovado"
+        situacao = "Aprovado" if media >= 7 else "Exame"
 
         registro = {
             "aluno": aluno,
