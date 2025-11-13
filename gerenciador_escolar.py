@@ -1,6 +1,19 @@
 import customtkinter as ctk
 import json
 import os
+from ctypes import CDLL, Structure, c_float, c_char_p
+
+# =================== Integração com C =================== #
+try:
+    lib = CDLL("./notas.so")  # use "notas.dll" no Windows
+except OSError:
+    lib = None
+    print("⚠️ Biblioteca C não encontrada — cálculo será feito em Python.")
+
+if lib:
+    class Resultado(Structure):
+        _fields_ = [("media", c_float), ("situacao", c_char_p)]
+
 
 # =================== Funções de Dados =================== #
 
@@ -65,8 +78,14 @@ def criar_secao_lancamento_notas(frame, alunos):
             mensagem.configure(text="As notas devem estar entre 0 e 10.", text_color="red")
             return
 
-        media = round((4 * np1 + 4 * np2 + 2 * pim) / 10, 2)
-        situacao = "Aprovado" if media >= 7 else "Exame"
+        if lib:
+            lib.calcular_media.restype = Resultado
+            res = lib.calcular_media(np1, np2, pim)
+            media = round(res.media, 2)
+            situacao = res.situacao.decode("utf-8")
+        else:
+            media = round((4 * np1 + 4 * np2 + 2 * pim) / 10, 2)
+            situacao = "Aprovado" if media >= 7 else "Exame"
 
         registro = {
             "aluno": aluno,
